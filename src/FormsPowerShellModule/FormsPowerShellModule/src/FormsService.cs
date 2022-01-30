@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Management.Automation;
 using System.Security;
 using System.Threading.Tasks;
@@ -9,17 +10,19 @@ using Newtonsoft.Json.Serialization;
 
 namespace FormsPowerShellModule
 {
-    internal class FormsService
+    public class FormsService
     {
         private static IPublicClientApplication _app;
-        private static PSCredential _credentials;
+        private static string _userName;
+        private static SecureString _password;
         private static AuthenticationResult _result;
         private static string _tenantId;
 
-        internal static void Connect(string tenantId, string clientId, PSCredential credentials)
+        public static void Connect(string tenantId, string clientId, string userName, SecureString password)
         {
             _tenantId = tenantId;
-            _credentials = credentials;
+            _userName = userName;
+            _password = password;
             _app = PublicClientApplicationBuilder.Create(clientId)
                 .WithAuthority($"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token")
                 .Build();
@@ -27,7 +30,7 @@ namespace FormsPowerShellModule
             AcquireToken().GetAwaiter().GetResult();
         }
 
-        internal static Forms[] Get(string userId, string[] fields)
+        public static Forms[] Get(string userId, string[] fields = null)
         {
             if (_result.ExpiresOn < DateTime.Now)
             {
@@ -37,7 +40,7 @@ namespace FormsPowerShellModule
             string url = $"https://forms.office.com/formapi/api/{_tenantId}/users/{userId}/light/forms";
             if (fields != null && fields.Length > 0)
             {
-                url = string.Concat(url, "?$select=", string.Join(",", fields));
+                url = string.Concat(url, "?$select=", string.Join(",", fields.Select(f => f.FirstLetterToLowerCase())));
             }
             var webRequest = System.Net.WebRequest.Create(url);
             webRequest.Method = "GET";
@@ -66,7 +69,7 @@ namespace FormsPowerShellModule
         private static async Task AcquireToken()
         {
             _result = await _app.AcquireTokenByUsernamePassword(new[] {"api://forms.office.com/c9a559d2-7aab-4f13-a6ed-e7e9c52aec87/Forms.Read"},
-                    _credentials.UserName, _credentials.Password)
+                    _userName, _password)
                 .ExecuteAsync();
         }
 

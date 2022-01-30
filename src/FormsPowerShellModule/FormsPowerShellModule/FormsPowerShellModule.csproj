@@ -61,6 +61,7 @@
     <Compile Include="Models\Forms.cs" />
     <Compile Include="Models\FormsResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Extensions.cs" />
     <Compile Include="src\FormsService.cs" />
   </ItemGroup>
   <ItemGroup>

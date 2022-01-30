@@ -240,3 +240,5 @@ ClientBin/
 *.pfx
 *.publishsettings
 orleans.codegen.cs
+
+local.runsettings

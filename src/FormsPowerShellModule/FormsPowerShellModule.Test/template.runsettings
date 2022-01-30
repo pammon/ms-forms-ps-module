@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <!-- Parameters used by tests at run time -->
+  <TestRunParameters>
+    <Parameter name="tenantId" value="" />
+    <Parameter name="clientId" value="" />
+    <Parameter name="userName" value="" />
+    <Parameter name="password" value="" />
+    <Parameter name="demoUserId" value="" />
+  </TestRunParameters>
+</RunSettings>

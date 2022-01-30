@@ -100,17 +100,5 @@ namespace FormsPowerShellModule.Models
         public int RowCount { get; set; }
         public string ProgressBarEnabled { get; set; }
         public string TrackingId { get; set; }
-        
-        [JsonIgnore]
-        public string UserPrincipalName { get; set; }
-
-        [JsonIgnore]
-        public string UserId { get; set; }
-
-        [JsonIgnore]
-        public string DisplayName { get; set; }
-
-        [JsonIgnore]
-        public string Mail { get; set; }
     }
 }

@@ -94,14 +94,7 @@ namespace FormsPowerShellModule
 
             foreach (User user in users)
             {
-                result.AddRange(GetForms(user.Id, fields).Select(u =>
-                {
-                    u.UserId = user.Id;
-                    u.UserPrincipalName = user.UserPrincipalName;
-                    u.DisplayName = user.DisplayName;
-                    u.Mail = user.Mail;
-                    return u;
-                }));
+                result.AddRange(GetForms(user.Id, fields));
             }
 
             return result.ToArray();

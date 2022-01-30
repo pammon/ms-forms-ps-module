@@ -66,8 +66,6 @@ namespace FormsPowerShellModule.Test
             {
                 Assert.IsFalse(string.IsNullOrEmpty(form.Id));
                 Assert.IsFalse(string.IsNullOrEmpty(form.Title));
-                Assert.IsFalse(string.IsNullOrEmpty(form.UserPrincipalName));
-                Assert.IsFalse(string.IsNullOrEmpty(form.UserId));
             }
         }
 
@@ -75,15 +73,15 @@ namespace FormsPowerShellModule.Test
         public void TestGeAllFormsFromDeletedUsers()
         {
             _formsService.Connect();
-            Forms[] forms = FormsService.Instance.GetFormsFromDeletedUsers(new string[]{"Id", "Title"});
+            Forms[] forms = FormsService.Instance.GetFormsFromDeletedUsers(new string[]{"Id", "Title", "CreatedBy", "OwnerId" });
             Assert.IsNotNull(forms);
             Assert.IsTrue(forms.Length > 0);
             foreach (Forms form in forms)
             {
                 Assert.IsFalse(string.IsNullOrEmpty(form.Id));
                 Assert.IsFalse(string.IsNullOrEmpty(form.Title));
-                Assert.IsFalse(string.IsNullOrEmpty(form.UserPrincipalName));
-                Assert.IsFalse(string.IsNullOrEmpty(form.UserId));
+                Assert.IsFalse(string.IsNullOrEmpty(form.CreatedBy));
+                Assert.IsFalse(string.IsNullOrEmpty(form.OwnerId));
             }
         }
 

@@ -21,7 +21,7 @@ namespace FormsPowerShellModule
 
         protected override void ProcessRecord()
         {
-            WriteObject(FormsService.Instance.GetForms(UserId, Fields));
+            WriteObject(FormsService.Instance.GetForms(UserId, Fields?.ToList()));
         }
     }
 }

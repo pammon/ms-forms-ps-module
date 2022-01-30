@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectMsFormsCmdlet.cs" />
+    <Compile Include="DownloadMsFormsResults.cs" />
     <Compile Include="GetAllMsFormsFromDeletedUsers.cs" />
     <Compile Include="GetAllMsForms.cs" />
     <Compile Include="GetMsFormsCmdlet.cs" />

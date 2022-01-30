@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Net;
@@ -27,8 +28,37 @@ namespace FormsPowerShellModule
             Instance = this;
         }
 
+        public void DownloadDownloadExcelFile(string formId, string path, int minResponseId = 1, int maxResponseId=1000)
+        {
+            if (Result.ExpiresOn < DateTime.Now)
+            {
+                AcquireToken().GetAwaiter().GetResult();
+            }
 
-        public Forms[] GetForms(string userId, string[] fields = null)
+            string url = $"https://forms.office.com/formapi/DownloadExcelFile.ashx?formid={formId}&timezoneOffset=180&minResponseId={minResponseId}&maxResponseId={maxResponseId}";
+            var webRequest = System.Net.WebRequest.Create(url);
+            webRequest.Method = "GET";
+            webRequest.Timeout = 12000;
+            webRequest.ContentType = "application/json";
+            string cookie = $"AADAuth.forms={Result.AccessToken};";
+            webRequest.Headers.Add("cookie", cookie);
+            webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
+
+            using (var response = webRequest.GetResponse())
+            {
+
+                using (System.IO.Stream s = response.GetResponseStream())
+                {
+                    using (FileStream fs = File.Create(path))
+                    {
+                        s.CopyTo(fs);
+                        fs.Close();
+                    }
+                }
+            }
+        }
+        
+        public Forms[] GetForms(string userId, List<string> fields = null)
         {
             if (Result.ExpiresOn < DateTime.Now)
             {
@@ -36,8 +66,19 @@ namespace FormsPowerShellModule
             }
             
             string url = $"https://forms.office.com/formapi/api/{TenantId}/users/{userId}/light/forms";
-            if (fields != null && fields.Length > 0)
+            if (fields != null && fields.Count > 0)
             {
+                if (!fields.Any(f => f.ToLower().Equals("id")))
+                {
+                   fields.Add("id");
+                }
+
+
+                if (!fields.Any(f => f.ToLower().Equals("ownerid")))
+                {
+                    fields.Add("ownerId");
+                }
+
                 url = string.Concat(url, "?$select=", string.Join(",", fields.Select(f => f.FirstLetterToLowerCase())));
             }
             var webRequest = System.Net.WebRequest.Create(url);
@@ -78,17 +119,18 @@ namespace FormsPowerShellModule
 
         }
 
-        public Forms[] GetFormsFromDeletedUsers(string[] fields = null)
+        public Forms[] GetFormsFromDeletedUsers(List<string> fields = null)
         {
             return GetFormsByUserList(_userService.GetDeletedUsers(), fields);
         }
 
-        public Forms[] GetForms(string[] fields = null)
+        public Forms[] GetForms(List<string> fields = null)
         {
             return GetFormsByUserList(_userService.GetUsers(), fields);
         }
 
-        private Forms[] GetFormsByUserList(User[] users, string[] fields = null)
+
+        private Forms[] GetFormsByUserList(User[] users, List<string> fields = null)
         {
             List<Forms> result = new List<Forms>();
 
@@ -99,7 +141,7 @@ namespace FormsPowerShellModule
 
             return result.ToArray();
         }
-
+        
         public static FormsService Instance;
     }
 }

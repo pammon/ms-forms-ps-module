@@ -7,5 +7,6 @@
     <Parameter name="userName" value="" />
     <Parameter name="password" value="" />
     <Parameter name="demoUserId" value="" />
+    <Parameter name="formId" value="" />
   </TestRunParameters>
 </RunSettings>

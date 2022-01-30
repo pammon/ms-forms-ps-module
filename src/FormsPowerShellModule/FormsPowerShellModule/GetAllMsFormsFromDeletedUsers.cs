@@ -17,7 +17,7 @@ namespace FormsPowerShellModule
 
         protected override void ProcessRecord()
         {
-            WriteObject(FormsService.Instance.GetFormsFromDeletedUsers(Fields));
+            WriteObject(FormsService.Instance.GetFormsFromDeletedUsers(Fields?.ToList()));
         }
     }
 }

@@ -8,20 +8,16 @@ using FormsPowerShellModule.Models;
 
 namespace FormsPowerShellModule
 {
-    [Cmdlet(VerbsCommon.Get, "MsForms")]
+    [Cmdlet(VerbsCommon.Get, "AllMsForms")]
     [OutputType(typeof(Forms[]))]
-    public class GetMsFormsCmdlet : Cmdlet
+    public class GetAllMsForms : Cmdlet
     {
-        [Parameter(Mandatory = true)]
-        public string UserId { get; set; }
-
-
         [Parameter(Mandatory = false)]
         public string[] Fields { get; set; }
 
         protected override void ProcessRecord()
         {
-            WriteObject(FormsService.Instance.GetForms(UserId, Fields));
+            WriteObject(FormsService.Instance.GetForms(Fields));
         }
     }
 }

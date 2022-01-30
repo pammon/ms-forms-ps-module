@@ -23,7 +23,8 @@ namespace FormsPowerShellModule
         
         protected override void ProcessRecord()
         {
-            FormsService.Connect(TenantId, ClientId, Credentials.UserName, Credentials.Password);
+            FormsService formsService = new FormsService(TenantId, ClientId, Credentials.UserName, Credentials.Password);
+            formsService.Connect();
             WriteVerbose("connected");
         }
     }

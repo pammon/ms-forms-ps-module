@@ -54,14 +54,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConnectMsFormsCmdlet.cs" />
+    <Compile Include="GetAllMsFormsFromDeletedUsers.cs" />
+    <Compile Include="GetAllMsForms.cs" />
     <Compile Include="GetMsFormsCmdlet.cs" />
     <Compile Include="Models\FormsLogo.cs" />
     <Compile Include="Models\FormsHeader.cs" />
     <Compile Include="Models\FormsBackground.cs" />
     <Compile Include="Models\Forms.cs" />
+    <Compile Include="Models\UsersResult.cs" />
     <Compile Include="Models\FormsResult.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Extensions.cs" />
+    <Compile Include="src\UserService.cs" />
+    <Compile Include="src\Service.cs" />
     <Compile Include="src\FormsService.cs" />
   </ItemGroup>
   <ItemGroup>

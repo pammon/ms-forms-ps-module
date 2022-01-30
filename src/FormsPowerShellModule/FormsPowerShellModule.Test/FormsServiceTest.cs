@@ -12,6 +12,8 @@ namespace FormsPowerShellModule.Test
         private static string _userName;
         private static string _password;
         private static string _demoUserId;
+
+        private static FormsService _formsService;
         
         [AssemblyInitialize]
         public static void Setup(TestContext context)
@@ -21,6 +23,7 @@ namespace FormsPowerShellModule.Test
             _userName = context.Properties["userName"] as string;
             _password = context.Properties["password"] as string;
             _demoUserId = context.Properties["demoUserId"] as string;
+            _formsService = new FormsService(_tenantId, _clientId, _userName, _password.ToSecureString());
         }
 
         [TestMethod]
@@ -28,7 +31,7 @@ namespace FormsPowerShellModule.Test
         {   
             try
             {
-                FormsService.Connect(_tenantId, _clientId, _userName, _password.ToSecureString());
+                _formsService.Connect();
             }
             catch(Exception ex)
             {
@@ -40,8 +43,8 @@ namespace FormsPowerShellModule.Test
         [TestMethod]
         public void TestGetForms()
         {
-            FormsService.Connect(_tenantId, _clientId, _userName, _password.ToSecureString());
-            Forms[] forms = FormsService.Get(_demoUserId);
+            _formsService.Connect();
+            Forms[] forms = FormsService.Instance.GetForms(_demoUserId);
             Assert.IsNotNull(forms);
             Assert.IsTrue(forms.Length > 0);
             foreach (Forms form in forms)
@@ -51,11 +54,64 @@ namespace FormsPowerShellModule.Test
             }
         }
 
+
+        [TestMethod]
+        public void TestGeAllForms()
+        {
+            _formsService.Connect();
+            Forms[] forms = FormsService.Instance.GetForms();
+            Assert.IsNotNull(forms);
+            Assert.IsTrue(forms.Length > 0);
+            foreach (Forms form in forms)
+            {
+                Assert.IsFalse(string.IsNullOrEmpty(form.Id));
+                Assert.IsFalse(string.IsNullOrEmpty(form.Title));
+                Assert.IsFalse(string.IsNullOrEmpty(form.UserPrincipalName));
+                Assert.IsFalse(string.IsNullOrEmpty(form.UserId));
+            }
+        }
+
+        [TestMethod]
+        public void TestGeAllFormsFromDeletedUsers()
+        {
+            _formsService.Connect();
+            Forms[] forms = FormsService.Instance.GetFormsFromDeletedUsers(new string[]{"Id", "Title"});
+            Assert.IsNotNull(forms);
+            Assert.IsTrue(forms.Length > 0);
+            foreach (Forms form in forms)
+            {
+                Assert.IsFalse(string.IsNullOrEmpty(form.Id));
+                Assert.IsFalse(string.IsNullOrEmpty(form.Title));
+                Assert.IsFalse(string.IsNullOrEmpty(form.UserPrincipalName));
+                Assert.IsFalse(string.IsNullOrEmpty(form.UserId));
+            }
+        }
+
+        [TestMethod]
+        public void TestGetUsers()
+        {
+            UserService userService = new UserService(_tenantId, _clientId, _userName, _password.ToSecureString());
+            userService.Connect();
+            User[] users = userService.GetUsers(2);
+            Assert.IsNotNull(users);
+            Assert.IsTrue(users.Length > 2);
+        }
+
+        [TestMethod]
+        public void TestGetDeletedUsers()
+        {
+            UserService userService = new UserService(_tenantId, _clientId, _userName, _password.ToSecureString());
+            userService.Connect();
+            User[] users = userService.GetDeletedUsers(2);
+            Assert.IsNotNull(users);
+            Assert.IsTrue(users.Length > 2);
+        }
+
         [TestMethod]
         public void TestGetFormsWithFields()
         {
-            FormsService.Connect(_tenantId, _clientId, _userName, _password.ToSecureString());
-            Forms[] forms = FormsService.Get(_demoUserId, new[] { "id" });
+            _formsService.Connect();
+            Forms[] forms = _formsService.GetForms(_demoUserId, new[] { "id" });
             Assert.IsNotNull(forms);
             Assert.IsTrue(forms.Length > 0);
             foreach (Forms form in forms)
@@ -68,8 +124,8 @@ namespace FormsPowerShellModule.Test
         [TestMethod]
         public void TestGetFormsWithFieldsUpperCase()
         {
-            FormsService.Connect(_tenantId, _clientId, _userName, _password.ToSecureString());
-            Forms[] forms = FormsService.Get(_demoUserId, new []{"Id", "Title"});
+            _formsService.Connect();
+            Forms[] forms = _formsService.GetForms(_demoUserId, new []{"Id", "Title"});
             Assert.IsNotNull(forms);
             Assert.IsTrue(forms.Length > 0);
             foreach (Forms form in forms)

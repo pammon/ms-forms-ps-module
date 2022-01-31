@@ -6,17 +6,15 @@ using FormsPowerShellModule.Models;
 namespace FormsPowerShellModule.Test
 {
     [TestClass]
-    public class FormsServiceTest
+    public class FormsServiceTestInteractive
     {
         private string _tenantId;
         private string _clientId;
-        private string _userName;
-        private string _password;
         private string _demoUserId;
         private string _formId;
 
-        private static FormsService _formsService;
-        
+        private FormsService _formsService;
+
         public TestContext TestContext { get; set; }
 
         [TestInitialize]
@@ -24,15 +22,13 @@ namespace FormsPowerShellModule.Test
         {
             _tenantId = TestContext.Properties["tenantId"] as string;
             _clientId = TestContext.Properties["clientId"] as string;
-            _userName = TestContext.Properties["userName"] as string;
-            _password = TestContext.Properties["password"] as string;
             _demoUserId = TestContext.Properties["demoUserId"] as string;
             _formId = TestContext.Properties["formId"] as string;
-            _formsService = new FormsService(_tenantId, _clientId, _userName, _password.ToSecureString());
+            _formsService = new FormsService(_tenantId, _clientId);
         }
         
         [TestMethod]
-        public void TestConnect()
+        public void TestConnectInteractive()
         {   
             try
             {
@@ -46,7 +42,7 @@ namespace FormsPowerShellModule.Test
 
 
         [TestMethod]
-        public void TestGetForms()
+        public void TestGetFormsInteractive()
         {
             _formsService.Connect();
             Forms[] forms = FormsService.Instance.GetForms(_demoUserId);
@@ -60,7 +56,7 @@ namespace FormsPowerShellModule.Test
         }
 
         [TestMethod]
-        public void TestDownload()
+        public void TestDownloadInteractive()
         {
             _formsService.Connect();
             FormsService.Instance.DownloadDownloadExcelFile(_formId, $"{_formId}.xlsx");
@@ -68,7 +64,7 @@ namespace FormsPowerShellModule.Test
 
 
         [TestMethod]
-        public void TestGeAllForms()
+        public void TestGeAllFormsInteractive()
         {
             _formsService.Connect();
             Forms[] forms = FormsService.Instance.GetForms();
@@ -82,7 +78,7 @@ namespace FormsPowerShellModule.Test
         }
 
         [TestMethod]
-        public void TestGeAllFormsFromDeletedUsers()
+        public void TestGeAllFormsFromDeletedUsersInteractive()
         {
             _formsService.Connect();
             Forms[] forms = FormsService.Instance.GetFormsFromDeletedUsers(new string[]{"Id", "Title", "CreatedBy", "OwnerId" }.ToList());
@@ -98,9 +94,9 @@ namespace FormsPowerShellModule.Test
         }
 
         [TestMethod]
-        public void TestGetUsers()
+        public void TestGetUsersInteractive()
         {
-            UserService userService = new UserService(_tenantId, _clientId, _userName, _password.ToSecureString());
+            UserService userService = new UserService(_tenantId, _clientId);
             userService.Connect();
             User[] users = userService.GetUsers(2);
             Assert.IsNotNull(users);
@@ -108,9 +104,9 @@ namespace FormsPowerShellModule.Test
         }
 
         [TestMethod]
-        public void TestGetDeletedUsers()
+        public void TestGetDeletedUsersInteractive()
         {
-            UserService userService = new UserService(_tenantId, _clientId, _userName, _password.ToSecureString());
+            UserService userService = new UserService(_tenantId, _clientId);
             userService.Connect();
             User[] users = userService.GetDeletedUsers(2);
             Assert.IsNotNull(users);
@@ -118,7 +114,7 @@ namespace FormsPowerShellModule.Test
         }
 
         [TestMethod]
-        public void TestGetFormsWithFields()
+        public void TestGetFormsWithFieldsInteractive()
         {
             _formsService.Connect();
             Forms[] forms = _formsService.GetForms(_demoUserId, new[] { "id" }.ToList());
@@ -132,7 +128,7 @@ namespace FormsPowerShellModule.Test
         }
 
         [TestMethod]
-        public void TestGetFormsWithFieldsUpperCase()
+        public void TestGetFormsWithFieldsUpperCaseInteractive()
         {
             _formsService.Connect();
             Forms[] forms = _formsService.GetForms(_demoUserId, new []{"Id", "Title"}.ToList());

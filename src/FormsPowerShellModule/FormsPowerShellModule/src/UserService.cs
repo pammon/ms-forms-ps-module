@@ -14,7 +14,7 @@ namespace FormsPowerShellModule
     public class UserService : Service
     {
 
-        public UserService(string tenantId, string clientId, string userName, SecureString password) : base(tenantId, clientId, userName, password, new[] { "https://graph.microsoft.com/User.Read.All" })
+        public UserService(string tenantId, string clientId, string userName = null, SecureString password = null) : base(tenantId, clientId, new[] { "https://graph.microsoft.com/User.Read.All" }, userName, password)
         {
         }
 

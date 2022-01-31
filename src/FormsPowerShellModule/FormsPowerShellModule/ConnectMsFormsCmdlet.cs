@@ -18,12 +18,12 @@ namespace FormsPowerShellModule
         public string ClientId { get; set; }
 
 
-        [Parameter(Mandatory = true)]
+        [Parameter(Mandatory = false)]
         public PSCredential Credentials { get; set; }
         
         protected override void ProcessRecord()
         {
-            FormsService formsService = new FormsService(TenantId, ClientId, Credentials.UserName, Credentials.Password);
+            FormsService formsService = new FormsService(TenantId, ClientId, Credentials?.UserName, Credentials?.Password);
             formsService.Connect();
             WriteVerbose("connected");
         }

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Web.WebView2.Core;
 
 namespace FormsPowerShellModule
 {
@@ -26,6 +28,11 @@ namespace FormsPowerShellModule
             }
 
             return stringBuilder.ToString();
+        }
+
+        internal static  Cookie GetCookie(this CoreWebView2Cookie coreCookie)
+        {
+            return new Cookie(coreCookie.Name, coreCookie.Value, coreCookie.Path, coreCookie.Domain);
         }
     }
 }

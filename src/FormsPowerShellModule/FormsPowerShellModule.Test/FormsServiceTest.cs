@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using FormsPowerShellModule.Models;
+using Microsoft.Web.WebView2.Core;
 
 namespace FormsPowerShellModule.Test
 {
@@ -13,7 +14,9 @@ namespace FormsPowerShellModule.Test
         private string _userName;
         private string _password;
         private string _demoUserId;
+        private string _groupId;
         private string _formId;
+        private string _newOwnerId;
 
         private static FormsService _formsService;
         
@@ -27,7 +30,9 @@ namespace FormsPowerShellModule.Test
             _userName = TestContext.Properties["userName"] as string;
             _password = TestContext.Properties["password"] as string;
             _demoUserId = TestContext.Properties["demoUserId"] as string;
+            _groupId = TestContext.Properties["groupId"] as string;
             _formId = TestContext.Properties["formId"] as string;
+            _newOwnerId = TestContext.Properties["newOwnerId"] as string;
             _formsService = new FormsService(_tenantId, _clientId, _userName, _password.ToSecureString());
         }
         
@@ -44,6 +49,46 @@ namespace FormsPowerShellModule.Test
             }
         }
 
+        [TestMethod]
+        public void TestModerBrowser()
+        {
+            try
+            {
+                WebBrowserFactory mb = new WebBrowserFactory();
+                FormsApiAuthenticationInformation formsApiAuthenticationInformation = mb.AcquireToken().GetAwaiter().GetResult();
+                Assert.IsNotNull(formsApiAuthenticationInformation.AadAuthForms);
+                Assert.IsNotNull(formsApiAuthenticationInformation.AntiForgeryToken);
+                Assert.IsNotNull(formsApiAuthenticationInformation.RequestVerificationToken);
+
+            }
+            catch (Exception ex)
+            {
+                Assert.Fail(ex.Message);
+            }
+        }
+        [TestMethod]
+        public void TestUpdateForm()
+        {
+            _formsService.Connect();
+            Assert.IsTrue(FormsService.Instance.UpdateFormSettings(_demoUserId, _formId, true, "thanks ms for nothing. assholes")
+                .GetAwaiter().GetResult());
+        }
+
+        [TestMethod]
+        public void TestMoveFormToGroup()
+        {
+            _formsService.Connect();
+            Assert.IsTrue(FormsService.Instance.MoveFormToGroup( _demoUserId, _formId, _groupId)
+                .GetAwaiter().GetResult());
+        }
+
+        [TestMethod]
+        public void TestMoveFormToUser()
+        {
+            _formsService.Connect();
+            Assert.IsTrue(FormsService.Instance.MoveFormToUser( _demoUserId, _formId, _newOwnerId)
+                .GetAwaiter().GetResult());
+        }
 
         [TestMethod]
         public void TestGetForms()

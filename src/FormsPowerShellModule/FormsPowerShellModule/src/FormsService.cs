@@ -130,6 +130,93 @@ namespace FormsPowerShellModule
         }
 
 
+        public async Task<bool> UpdateFormSettings(string userId, string formId, bool formClosed, string formClosedMessage)
+        {
+            FormsApiAuthenticationInformation authenticationInformation = await new WebBrowserFactory().AcquireToken();
+
+            string body = "{\"settings\":\"{\\\"FormClosed\\\":" + $"{formClosed}".ToLower() + ",\\\"FormClosedMessage\\\":\\\"" +
+                          formClosedMessage + "\\\"}\"}";
+            byte[] json = System.Text.Encoding.UTF8.GetBytes(body);
+
+            CookieContainer cc = new CookieContainer();
+            cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
+            cc.Add(authenticationInformation.AadAuthForms.GetCookie());
+
+            var webRequest = (HttpWebRequest)System.Net.WebRequest.Create($"https://forms.office.com/formapi/api/{TenantId}/users/{userId}/forms('{formId}')");
+            webRequest.Timeout = 12000;
+            webRequest.ContentType = "application/json";
+            webRequest.CookieContainer = cc;
+            webRequest.Host = "forms.office.com";
+            webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
+            webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
+            webRequest.Method = "PATCH";
+            webRequest.ContentType = "application/json";
+            webRequest.ContentLength = json.Length;
+
+            using (Stream dataStream = webRequest.GetRequestStream())
+            {
+                dataStream.Write(json, 0, json.Length);
+                dataStream.Close();
+            }
+            using (var response = (HttpWebResponse)webRequest.GetResponse())
+            {
+                return response.StatusCode == HttpStatusCode.NoContent;
+            }
+        }
+
+        public Task<bool> MoveFormToUser(string userId, string formId, string newOwnerId)
+        {
+            return MoveForm( userId, formId, newOwnerId, false);
+        }
+        
+        public Task<bool> MoveFormToGroup(string userId, string formId, string groupId)
+        {
+            return MoveForm(userId, formId, groupId, true);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <param name="teantId"></param>
+        /// <param name="userId"></param>
+        /// <param name="formId"></param>
+        /// <param name="newOwnerId">needs to be a globaladmin</param>
+        /// <returns></returns>
+        private async Task<bool> MoveForm(string userId, string formId, string newOwnerId, bool isNewOwnerGroup)
+        {
+            FormsApiAuthenticationInformation authenticationInformation = await new WebBrowserFactory().AcquireToken();
+
+            string body = "{\"newOwnerId\":\"" + newOwnerId + "\",\"isNewOwnerGroup\":"+$"{isNewOwnerGroup}".ToLower()+"}";
+            byte[] json = System.Text.Encoding.UTF8.GetBytes(body);
+
+            CookieContainer cc = new CookieContainer();
+            cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
+            cc.Add(authenticationInformation.AadAuthForms.GetCookie());
+
+            var webRequest = (HttpWebRequest)System.Net.WebRequest.Create($"https://forms.office.com/formapi/api/{TenantId}/users/{userId}/light/forms('{formId}')/MoveForm");
+            webRequest.Timeout = 12000;
+            webRequest.ContentType = "application/json";
+            webRequest.CookieContainer = cc;
+            webRequest.Host = "forms.office.com";
+            webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
+            webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
+            webRequest.Method = "POST";
+            webRequest.ContentType = "application/json";
+            webRequest.ContentLength = json.Length;
+
+            using (Stream dataStream = webRequest.GetRequestStream())
+            {
+                dataStream.Write(json, 0, json.Length);
+                dataStream.Close();
+            }
+            using (var response = (HttpWebResponse)webRequest.GetResponse())
+            {
+                return response.StatusCode == HttpStatusCode.OK;
+            }
+        }
+
+
+
         private Forms[] GetFormsByUserList(User[] users, List<string> fields = null)
         {
             List<Forms> result = new List<Forms>();

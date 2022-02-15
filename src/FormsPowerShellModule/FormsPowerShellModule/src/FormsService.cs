@@ -30,9 +30,21 @@ namespace FormsPowerShellModule
 
         public void DownloadDownloadExcelFile(string formId, string path, int minResponseId = 1, int maxResponseId=1000)
         {
-            if (Result.ExpiresOn < DateTime.Now)
+            string token = string.Empty;
+            if (Result == null)
             {
-                AcquireToken().GetAwaiter().GetResult();
+                FormsApiAuthenticationInformation authenticationInformation = new WebBrowserFactory().AcquireToken().GetAwaiter().GetResult();
+                token = authenticationInformation.AadAuthForms.Value;
+                TenantId = authenticationInformation.TenantId;
+            }
+            else
+            {
+                if (Result.ExpiresOn < DateTime.Now)
+                {
+                    AcquireToken().GetAwaiter().GetResult();
+                }
+
+                token = Result.AccessToken;
             }
 
             string url = $"https://forms.office.com/formapi/DownloadExcelFile.ashx?formid={formId}&timezoneOffset=180&minResponseId={minResponseId}&maxResponseId={maxResponseId}";
@@ -40,7 +52,7 @@ namespace FormsPowerShellModule
             webRequest.Method = "GET";
             webRequest.Timeout = 12000;
             webRequest.ContentType = "application/json";
-            string cookie = $"AADAuth.forms={Result.AccessToken};";
+            string cookie = $"AADAuth.forms={token};";
             webRequest.Headers.Add("cookie", cookie);
             webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
 

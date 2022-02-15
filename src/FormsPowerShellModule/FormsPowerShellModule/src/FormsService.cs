@@ -16,7 +16,7 @@ namespace FormsPowerShellModule
     public class FormsService : Service
     {
         private readonly UserService _userService;
-        public FormsService(string tenantId, string clientId, string userName = null, SecureString password = null) : base(tenantId, clientId, new[] { "api://forms.office.com/c9a559d2-7aab-4f13-a6ed-e7e9c52aec87/Forms.Read" }, userName, password)
+        public FormsService(string tenantId = "", string clientId = "", string userName = null, SecureString password = null) : base(tenantId, clientId, new[] { "api://forms.office.com/c9a559d2-7aab-4f13-a6ed-e7e9c52aec87/Forms.Read" }, userName, password)
         {
             _userService = new UserService(tenantId, clientId, userName, password);
         }
@@ -60,10 +60,24 @@ namespace FormsPowerShellModule
         
         public Forms[] GetForms(string userId, List<string> fields = null)
         {
-            if (Result.ExpiresOn < DateTime.Now)
+            string token = string.Empty;
+            if (Result == null)
             {
-                AcquireToken().GetAwaiter().GetResult();
+                FormsApiAuthenticationInformation authenticationInformation = new WebBrowserFactory().AcquireToken().GetAwaiter().GetResult();
+                token = authenticationInformation.AadAuthForms.Value;
+                TenantId = authenticationInformation.TenantId;
             }
+            else
+            {
+                if (Result.ExpiresOn < DateTime.Now)
+                {
+                    AcquireToken().GetAwaiter().GetResult();
+                }
+
+                token = Result.AccessToken;
+            }
+
+            
             
             string url = $"https://forms.office.com/formapi/api/{TenantId}/users/{userId}/light/forms";
             if (fields != null && fields.Count > 0)
@@ -85,7 +99,7 @@ namespace FormsPowerShellModule
             webRequest.Method = "GET";
             webRequest.Timeout = 12000;
             webRequest.ContentType = "application/json";
-            string cookie = $"AADAuth.forms={Result.AccessToken};";
+            string cookie = $"AADAuth.forms={token};";
             webRequest.Headers.Add("cookie", cookie);
             webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
 

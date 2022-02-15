@@ -20,8 +20,8 @@ namespace FormsPowerShellModule.Test
         [TestInitialize]
         public void Setup()
         {
-            _tenantId = TestContext.Properties["tenantId"] as string;
-            _clientId = TestContext.Properties["clientId"] as string;
+            //_tenantId = TestContext.Properties["tenantId"] as string;
+            //_clientId = TestContext.Properties["clientId"] as string;
             _demoUserId = TestContext.Properties["demoUserId"] as string;
             _formId = TestContext.Properties["formId"] as string;
             _formsService = new FormsService(_tenantId, _clientId);

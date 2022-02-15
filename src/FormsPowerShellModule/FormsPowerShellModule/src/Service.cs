@@ -18,7 +18,7 @@ namespace FormsPowerShellModule
         private readonly string _userName;
         private readonly SecureString _password;
         protected AuthenticationResult Result;
-        protected readonly string TenantId;
+        protected string TenantId;
         private readonly string _clientId;
 
         public Service(string tenantId, string clientId, string[] scopes, string userName = null, SecureString password = null)
@@ -28,7 +28,7 @@ namespace FormsPowerShellModule
             _password = password;
             _scopes = scopes;
             _clientId = clientId;
-            if (_app == null)
+            if (_app == null && !string.IsNullOrEmpty(_clientId))
             {
                 _app = PublicClientApplicationBuilder.Create(_clientId)
                     .WithAuthority($"https://login.microsoftonline.com/{TenantId}/oauth2/v2.0/token")
@@ -47,25 +47,28 @@ namespace FormsPowerShellModule
 
         protected async Task AcquireToken()
         {
-            if (string.IsNullOrEmpty(_userName) || _password == null)
+            if (_app != null)
             {
-                var accounts = await _app.GetAccountsAsync();
-
-                try
+                if (string.IsNullOrEmpty(_userName) || _password == null)
                 {
-                    Result = await _app.AcquireTokenSilent(_scopes, accounts.FirstOrDefault()).ExecuteAsync();
-                }
-                catch (MsalUiRequiredException ex)
-                {
+                    var accounts = await _app.GetAccountsAsync();
 
-                    Result = await _app.AcquireTokenInteractive(_scopes).ExecuteAsync();
+                    try
+                    {
+                        Result = await _app.AcquireTokenSilent(_scopes, accounts.FirstOrDefault()).ExecuteAsync();
+                    }
+                    catch (MsalUiRequiredException ex)
+                    {
+
+                        Result = await _app.AcquireTokenInteractive(_scopes).ExecuteAsync();
+                    }
                 }
-            }
-            else
-            {
-                Result = await _app.AcquireTokenByUsernamePassword(_scopes,
-                        _userName, _password)
-                    .ExecuteAsync();
+                else
+                {
+                    Result = await _app.AcquireTokenByUsernamePassword(_scopes,
+                            _userName, _password)
+                        .ExecuteAsync();
+                }
             }
         }
     }

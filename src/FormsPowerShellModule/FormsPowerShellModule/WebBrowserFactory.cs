@@ -112,27 +112,25 @@ namespace FormsPowerShellModule
 
                 string html = await _webView2.CoreWebView2.ExecuteScriptAsync("document.documentElement.outerHTML");
 
-                Match match = Regex.Match(html, "antiForgeryToken:([^,]*)");
+                Match antiForgeryTokenMatch = Regex.Match(html, "antiForgeryToken:([^,]*)");
+                Match tenantIdMatch = Regex.Match(html, "TenantId([^,]*)");
 
-                if (match.Success && match.Groups.Count == 2)
+                if (antiForgeryTokenMatch.Success && antiForgeryTokenMatch.Groups.Count == 2 && tenantIdMatch.Success && tenantIdMatch.Groups.Count == 2)
                 {
-                    string antiForgeryToken = match.Groups[1].Value.Trim(' ', '\\', '"');
+                    string antiForgeryToken = antiForgeryTokenMatch.Groups[1].Value.Trim(' ', '\\', '"');
+                    string tenantId = tenantIdMatch.Groups[1].Value.Trim(' ', '\\', '"', ':');
 
 
                     if (requestverificationtoken != null && aadAuthForms != null &&
                         !string.IsNullOrEmpty(antiForgeryToken))
                     {
 
-                        _cookiesTask.SetResult(new FormsApiAuthenticationInformation(antiForgeryToken, requestverificationtoken, aadAuthForms));
+                        _cookiesTask.SetResult(new FormsApiAuthenticationInformation(antiForgeryToken, requestverificationtoken, aadAuthForms, tenantId));
                          DialogResult = DialogResult.OK;
                         Close();
                     }
 
                 }
-
-                var co = String.Join(";", cookies.Select(c => $"{c.Name}={c.Value}"));
-
-
             }
         }
         

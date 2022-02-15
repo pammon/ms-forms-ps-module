@@ -10,14 +10,12 @@ namespace FormsPowerShellModule
     [Cmdlet(VerbsCommunications.Connect, "MsForms")]
     public class ConnectMsFormsCmdlet : Cmdlet
     {
-        [Parameter(Mandatory = true)]
+        [Parameter(Mandatory = false)]
         public string TenantId { get; set; }
-
-
-        [Parameter(Mandatory = true)]
+        
+        [Parameter(Mandatory = false)]
         public string ClientId { get; set; }
-
-
+        
         [Parameter(Mandatory = false)]
         public PSCredential Credentials { get; set; }
         

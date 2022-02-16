@@ -104,6 +104,14 @@ namespace FormsPowerShellModule.Test
         }
 
         [TestMethod]
+        public void TestUpdateFormInteractive()
+        {
+            _formsService.Connect();
+            Assert.IsTrue(FormsService.Instance.UpdateFormSettings(_demoUserId, _formId, true, "thanks ms for nothing. assholes")
+                .GetAwaiter().GetResult());
+        }
+
+        [TestMethod]
         public void TestGetDeletedUsersInteractive()
         {
             UserService userService = new UserService(_tenantId, _clientId);

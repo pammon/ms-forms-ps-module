@@ -50,7 +50,7 @@ namespace FormsPowerShellModule
             string url = $"https://forms.office.com/formapi/DownloadExcelFile.ashx?formid={formId}&timezoneOffset=180&minResponseId={minResponseId}&maxResponseId={maxResponseId}";
             var webRequest = System.Net.WebRequest.Create(url);
             webRequest.Method = "GET";
-            webRequest.Timeout = 12000;
+            webRequest.Timeout = 60000;
             webRequest.ContentType = "application/json";
             string cookie = $"AADAuth.forms={token};";
             webRequest.Headers.Add("cookie", cookie);
@@ -168,7 +168,7 @@ namespace FormsPowerShellModule
             cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
             cc.Add(authenticationInformation.AadAuthForms.GetCookie());
 
-            var webRequest = (HttpWebRequest)System.Net.WebRequest.Create($"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')");
+            var webRequest = (HttpWebRequest)System.Net.WebRequest.Create($"https://forms.office.com/formapi/api/{authenticationInformation.}/users/{userId}/forms('{formId}')");
             webRequest.Timeout = 12000;
             webRequest.ContentType = "application/json";
             webRequest.CookieContainer = cc;

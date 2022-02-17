@@ -168,7 +168,7 @@ namespace FormsPowerShellModule
             cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
             cc.Add(authenticationInformation.AadAuthForms.GetCookie());
 
-            var webRequest = (HttpWebRequest)System.Net.WebRequest.Create($"https://forms.office.com/formapi/api/{authenticationInformation.}/users/{userId}/forms('{formId}')");
+            var webRequest = (HttpWebRequest)System.Net.WebRequest.Create($"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')");
             webRequest.Timeout = 12000;
             webRequest.ContentType = "application/json";
             webRequest.CookieContainer = cc;

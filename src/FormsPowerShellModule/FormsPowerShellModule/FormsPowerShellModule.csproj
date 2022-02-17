@@ -68,8 +68,14 @@
     <Compile Include="DownloadMsFormsResults.cs" />
     <Compile Include="GetAllMsFormsFromDeletedUsers.cs" />
     <Compile Include="GetAllMsForms.cs" />
+    <Compile Include="GetMsFormsResponsesCmdlet.cs" />
+    <Compile Include="Models\Question.cs" />
+    <Compile Include="Models\Questions.cs" />
+    <Compile Include="Models\Responses.cs" />
+    <Compile Include="Models\Response.cs" />
     <Compile Include="MoveMsFormsToGroup.cs" />
     <Compile Include="MoveMsFormsToUser.cs" />
+    <Compile Include="GetMsFormsQuestionsCmdlet.cs" />
     <Compile Include="SetMsFormsCmdlet.cs" />
     <Compile Include="GetMsFormsCmdlet.cs" />
     <Compile Include="Models\FormsApiAuthenticationInformation.cs" />

@@ -111,6 +111,25 @@ namespace FormsPowerShellModule.Test
                 .GetAwaiter().GetResult());
         }
 
+
+        [TestMethod]
+        public void TestGetFormQuestionsInteractive()
+        {
+            _formsService.Connect();
+            var questions = FormsService.Instance.GetFormQuestions(_demoUserId, _formId).GetAwaiter().GetResult();
+            Assert.IsNotNull(questions);
+            Assert.IsTrue(questions.Length > 2);
+        }
+
+
+        [TestMethod]
+        public void TestGetFormResponsesInteractive()
+        {
+            _formsService.Connect();
+            var responses = FormsService.Instance.GetFormResponses(_demoUserId, _formId).GetAwaiter().GetResult();
+            Assert.IsNotNull(responses);
+        }
+
         [TestMethod]
         public void TestGetDeletedUsersInteractive()
         {

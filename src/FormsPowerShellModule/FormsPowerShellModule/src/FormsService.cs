@@ -16,7 +16,10 @@ namespace FormsPowerShellModule
     public class FormsService : Service
     {
         private readonly UserService _userService;
-        public FormsService(string tenantId = "", string clientId = "", string userName = null, SecureString password = null) : base(tenantId, clientId, new[] { "api://forms.office.com/c9a559d2-7aab-4f13-a6ed-e7e9c52aec87/Forms.Read" }, userName, password)
+
+        public FormsService(string tenantId = "", string clientId = "", string userName = null,
+            SecureString password = null) : base(tenantId, clientId,
+            new[] {"api://forms.office.com/c9a559d2-7aab-4f13-a6ed-e7e9c52aec87/Forms.Read"}, userName, password)
         {
             _userService = new UserService(tenantId, clientId, userName, password);
         }
@@ -28,12 +31,14 @@ namespace FormsPowerShellModule
             Instance = this;
         }
 
-        public void DownloadDownloadExcelFile(string formId, string path, int minResponseId = 1, int maxResponseId=1000)
+        public void DownloadDownloadExcelFile(string formId, string path, int minResponseId = 1,
+            int maxResponseId = 1000)
         {
             string token = string.Empty;
             if (Result == null)
             {
-                FormsApiAuthenticationInformation authenticationInformation = new WebBrowserFactory().AcquireToken().GetAwaiter().GetResult();
+                FormsApiAuthenticationInformation authenticationInformation =
+                    new WebBrowserFactory().AcquireToken().GetAwaiter().GetResult();
                 token = authenticationInformation.AadAuthForms.Value;
                 TenantId = authenticationInformation.TenantId;
             }
@@ -47,7 +52,8 @@ namespace FormsPowerShellModule
                 token = Result.AccessToken;
             }
 
-            string url = $"https://forms.office.com/formapi/DownloadExcelFile.ashx?formid={formId}&timezoneOffset=180&minResponseId={minResponseId}&maxResponseId={maxResponseId}";
+            string url =
+                $"https://forms.office.com/formapi/DownloadExcelFile.ashx?formid={formId}&timezoneOffset=180&minResponseId={minResponseId}&maxResponseId={maxResponseId}";
             var webRequest = System.Net.WebRequest.Create(url);
             webRequest.Method = "GET";
             webRequest.Timeout = 60000;
@@ -58,7 +64,6 @@ namespace FormsPowerShellModule
 
             using (var response = webRequest.GetResponse())
             {
-
                 using (System.IO.Stream s = response.GetResponseStream())
                 {
                     using (FileStream fs = File.Create(path))
@@ -69,13 +74,14 @@ namespace FormsPowerShellModule
                 }
             }
         }
-        
+
         public Forms[] GetForms(string userId, List<string> fields = null)
         {
             string token = string.Empty;
             if (Result == null)
             {
-                FormsApiAuthenticationInformation authenticationInformation = new WebBrowserFactory().AcquireToken().GetAwaiter().GetResult();
+                FormsApiAuthenticationInformation authenticationInformation =
+                    new WebBrowserFactory().AcquireToken().GetAwaiter().GetResult();
                 token = authenticationInformation.AadAuthForms.Value;
                 TenantId = authenticationInformation.TenantId;
             }
@@ -89,14 +95,12 @@ namespace FormsPowerShellModule
                 token = Result.AccessToken;
             }
 
-            
-            
             string url = $"https://forms.office.com/formapi/api/{TenantId}/users/{userId}/light/forms";
             if (fields != null && fields.Count > 0)
             {
                 if (!fields.Any(f => f.ToLower().Equals("id")))
                 {
-                   fields.Add("id");
+                    fields.Add("id");
                 }
 
 
@@ -107,6 +111,7 @@ namespace FormsPowerShellModule
 
                 url = string.Concat(url, "?$select=", string.Join(",", fields.Select(f => f.FirstLetterToLowerCase())));
             }
+
             var webRequest = System.Net.WebRequest.Create(url);
             webRequest.Method = "GET";
             webRequest.Timeout = 12000;
@@ -119,17 +124,16 @@ namespace FormsPowerShellModule
             {
                 using (var response = webRequest.GetResponse())
                 {
-
                     using (System.IO.Stream s = response.GetResponseStream())
                     {
                         using (System.IO.StreamReader sr = new System.IO.StreamReader(s))
                         {
                             return JsonConvert.DeserializeObject<FormsResult>(sr.ReadToEnd(),
-                                new JsonSerializerSettings()
-                                {
-                                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                                    NullValueHandling = NullValueHandling.Ignore
-                                })
+                                    new JsonSerializerSettings()
+                                    {
+                                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                                        NullValueHandling = NullValueHandling.Ignore
+                                    })
                                 ?.Forms;
                         }
                     }
@@ -140,9 +144,7 @@ namespace FormsPowerShellModule
                 // handle 404 exceptions
             }
 
-            return new Forms[]{};
-
-
+            return new Forms[] { };
         }
 
         public Forms[] GetFormsFromDeletedUsers(List<string> fields = null)
@@ -156,11 +158,13 @@ namespace FormsPowerShellModule
         }
 
 
-        public async Task<bool> UpdateFormSettings(string userId, string formId, bool formClosed, string formClosedMessage)
+        public async Task<bool> UpdateFormSettings(string userId, string formId, bool formClosed,
+            string formClosedMessage)
         {
             FormsApiAuthenticationInformation authenticationInformation = await new WebBrowserFactory().AcquireToken();
 
-            string body = "{\"settings\":\"{\\\"FormClosed\\\":" + $"{formClosed}".ToLower() + ",\\\"FormClosedMessage\\\":\\\"" +
+            string body = "{\"settings\":\"{\\\"FormClosed\\\":" + $"{formClosed}".ToLower() +
+                          ",\\\"FormClosedMessage\\\":\\\"" +
                           formClosedMessage + "\\\"}\"}";
             byte[] json = System.Text.Encoding.UTF8.GetBytes(body);
 
@@ -168,7 +172,8 @@ namespace FormsPowerShellModule
             cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
             cc.Add(authenticationInformation.AadAuthForms.GetCookie());
 
-            var webRequest = (HttpWebRequest)System.Net.WebRequest.Create($"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')");
+            var webRequest = (HttpWebRequest) System.Net.WebRequest.Create(
+                $"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')");
             webRequest.Timeout = 12000;
             webRequest.ContentType = "application/json";
             webRequest.CookieContainer = cc;
@@ -184,17 +189,94 @@ namespace FormsPowerShellModule
                 dataStream.Write(json, 0, json.Length);
                 dataStream.Close();
             }
-            using (var response = (HttpWebResponse)webRequest.GetResponse())
+
+            using (var response = (HttpWebResponse) webRequest.GetResponse())
             {
                 return response.StatusCode == HttpStatusCode.NoContent;
             }
         }
 
+        public async Task<Question[]> GetFormQuestions(string userId, string formId)
+        {
+            FormsApiAuthenticationInformation authenticationInformation = await new WebBrowserFactory().AcquireToken();
+
+
+            CookieContainer cc = new CookieContainer();
+            cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
+            cc.Add(authenticationInformation.AadAuthForms.GetCookie());
+
+            var webRequest =
+                (HttpWebRequest) System.Net.WebRequest.Create(
+                    $"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')/questions");
+            webRequest.Timeout = 12000;
+            webRequest.ContentType = "application/json";
+            webRequest.CookieContainer = cc;
+            webRequest.Host = "forms.office.com";
+            webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
+            webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
+            webRequest.Method = "GET";
+            webRequest.ContentType = "application/json";
+            using (var response = (HttpWebResponse) webRequest.GetResponse())
+            {
+                using (System.IO.Stream s = response.GetResponseStream())
+                {
+                    using (System.IO.StreamReader sr = new System.IO.StreamReader(s))
+                    {
+                        return JsonConvert.DeserializeObject<Questions>(sr.ReadToEnd(),
+                                new JsonSerializerSettings()
+                                {
+                                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                                    NullValueHandling = NullValueHandling.Ignore
+                                })
+                            ?.Items;
+                    }
+                }
+            }
+        }
+
+        public async Task<Response[]> GetFormResponses(string userId, string formId)
+        {
+            FormsApiAuthenticationInformation authenticationInformation = await new WebBrowserFactory().AcquireToken();
+
+
+            CookieContainer cc = new CookieContainer();
+            cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
+            cc.Add(authenticationInformation.AadAuthForms.GetCookie());
+
+            var webRequest =
+                (HttpWebRequest)System.Net.WebRequest.Create(
+                    $"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')/responses");
+            webRequest.Timeout = 12000;
+            webRequest.ContentType = "application/json";
+            webRequest.CookieContainer = cc;
+            webRequest.Host = "forms.office.com";
+            webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
+            webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
+            webRequest.Method = "GET";
+            webRequest.ContentType = "application/json";
+            using (var response = (HttpWebResponse)webRequest.GetResponse())
+            {
+                using (System.IO.Stream s = response.GetResponseStream())
+                {
+                    using (System.IO.StreamReader sr = new System.IO.StreamReader(s))
+                    {
+                        return JsonConvert.DeserializeObject<Responses>(sr.ReadToEnd(),
+                                new JsonSerializerSettings()
+                                {
+                                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                                    NullValueHandling = NullValueHandling.Ignore
+                                })
+                            ?.Items;
+                    }
+                }
+            }
+        }
+
         public Task<bool> MoveFormToUser(string userId, string formId, string newOwnerId)
         {
-            return MoveForm( userId, formId, newOwnerId, false);
+            return MoveForm(userId, formId, newOwnerId, false);
         }
-        
+
         public Task<bool> MoveFormToGroup(string userId, string formId, string groupId)
         {
             return MoveForm(userId, formId, groupId, true);
@@ -212,14 +294,16 @@ namespace FormsPowerShellModule
         {
             FormsApiAuthenticationInformation authenticationInformation = await new WebBrowserFactory().AcquireToken();
 
-            string body = "{\"newOwnerId\":\"" + newOwnerId + "\",\"isNewOwnerGroup\":"+$"{isNewOwnerGroup}".ToLower()+"}";
+            string body = "{\"newOwnerId\":\"" + newOwnerId + "\",\"isNewOwnerGroup\":" +
+                          $"{isNewOwnerGroup}".ToLower() + "}";
             byte[] json = System.Text.Encoding.UTF8.GetBytes(body);
 
             CookieContainer cc = new CookieContainer();
             cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
             cc.Add(authenticationInformation.AadAuthForms.GetCookie());
 
-            var webRequest = (HttpWebRequest)System.Net.WebRequest.Create($"https://forms.office.com/formapi/api/{TenantId}/users/{userId}/light/forms('{formId}')/MoveForm");
+            var webRequest = (HttpWebRequest) System.Net.WebRequest.Create(
+                $"https://forms.office.com/formapi/api/{TenantId}/users/{userId}/light/forms('{formId}')/MoveForm");
             webRequest.Timeout = 12000;
             webRequest.ContentType = "application/json";
             webRequest.CookieContainer = cc;
@@ -235,12 +319,12 @@ namespace FormsPowerShellModule
                 dataStream.Write(json, 0, json.Length);
                 dataStream.Close();
             }
-            using (var response = (HttpWebResponse)webRequest.GetResponse())
+
+            using (var response = (HttpWebResponse) webRequest.GetResponse())
             {
                 return response.StatusCode == HttpStatusCode.OK;
             }
         }
-
 
 
         private Forms[] GetFormsByUserList(User[] users, List<string> fields = null)
@@ -254,7 +338,7 @@ namespace FormsPowerShellModule
 
             return result.ToArray();
         }
-        
+
         public static FormsService Instance;
     }
 }

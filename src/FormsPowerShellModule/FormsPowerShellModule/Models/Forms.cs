@@ -49,7 +49,6 @@ namespace FormsPowerShellModule.Models
         }
 
         public string CreatedBy { get; set; }
-        public List<object> Responses { get; set; }
         public List<object> PermissionTokens { get; set; }
         public object FileUploadFormInfo { get; set; }
         public bool XlFileUnSynced { get; set; }
@@ -68,7 +67,6 @@ namespace FormsPowerShellModule.Models
         public object Category { get; set; }
         public string LocaleInfo { get; set; }
         public List<object> DescriptiveQuestions { get; set; }
-        public List<object> Questions { get; set; }
         public object PredefinedResponses { get; set; }
         public string Id { get; set; }
         public string Title { get; set; }

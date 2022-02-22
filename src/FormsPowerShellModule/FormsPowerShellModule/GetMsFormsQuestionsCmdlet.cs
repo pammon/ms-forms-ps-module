@@ -18,9 +18,9 @@ namespace FormsPowerShellModule
         [Parameter(Mandatory = true)]
         public string FormId { get; set; }
         
-        protected override void ProcessRecord()
+        protected override async void ProcessRecord()
         {
-            WriteObject(FormsService.Instance.GetFormQuestions(UserId, FormId));
+            WriteObject(await FormsService.Instance.GetFormQuestions(UserId, FormId));
         }
     }
 }

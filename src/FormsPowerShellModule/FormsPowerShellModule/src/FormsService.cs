@@ -37,10 +37,12 @@ namespace FormsPowerShellModule
             string token = string.Empty;
             if (Result == null)
             {
-                FormsApiAuthenticationInformation authenticationInformation =
-                    new WebBrowserFactory().AcquireToken().GetAwaiter().GetResult();
-                token = authenticationInformation.AadAuthForms.Value;
-                TenantId = authenticationInformation.TenantId;
+                using (WebBrowserFactory webBrowser = new WebBrowserFactory())
+                {
+                    FormsApiAuthenticationInformation authenticationInformation = webBrowser.AcquireToken().GetAwaiter().GetResult();
+                    token = authenticationInformation.AadAuthForms.Value;
+                    TenantId = authenticationInformation.TenantId;
+                }
             }
             else
             {
@@ -163,38 +165,41 @@ namespace FormsPowerShellModule
         public async Task<bool> UpdateFormSettings(string userId, string formId, bool formClosed,
             string formClosedMessage)
         {
-            FormsApiAuthenticationInformation authenticationInformation = await new WebBrowserFactory().AcquireToken();
-
-            string body = "{\"settings\":\"{\\\"FormClosed\\\":" + $"{formClosed}".ToLower() +
-                          ",\\\"FormClosedMessage\\\":\\\"" +
-                          formClosedMessage + "\\\"}\"}";
-            byte[] json = System.Text.Encoding.UTF8.GetBytes(body);
-
-            CookieContainer cc = new CookieContainer();
-            cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
-            cc.Add(authenticationInformation.AadAuthForms.GetCookie());
-
-            var webRequest = (HttpWebRequest) System.Net.WebRequest.Create(
-                $"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')");
-            webRequest.Timeout = 12000;
-            webRequest.ContentType = "application/json";
-            webRequest.CookieContainer = cc;
-            webRequest.Host = "forms.office.com";
-            webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
-            webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
-            webRequest.Method = "PATCH";
-            webRequest.ContentType = "application/json";
-            webRequest.ContentLength = json.Length;
-
-            using (Stream dataStream = webRequest.GetRequestStream())
+            using (WebBrowserFactory webBrowser = new WebBrowserFactory())
             {
-                dataStream.Write(json, 0, json.Length);
-                dataStream.Close();
-            }
+                FormsApiAuthenticationInformation authenticationInformation = await webBrowser.AcquireToken();
 
-            using (var response = (HttpWebResponse) webRequest.GetResponse())
-            {
-                return response.StatusCode == HttpStatusCode.NoContent;
+                string body = "{\"settings\":\"{\\\"FormClosed\\\":" + $"{formClosed}".ToLower() +
+                              ",\\\"FormClosedMessage\\\":\\\"" +
+                              formClosedMessage + "\\\"}\"}";
+                byte[] json = System.Text.Encoding.UTF8.GetBytes(body);
+
+                CookieContainer cc = new CookieContainer();
+                cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
+                cc.Add(authenticationInformation.AadAuthForms.GetCookie());
+
+                var webRequest = (HttpWebRequest) System.Net.WebRequest.Create(
+                    $"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')");
+                webRequest.Timeout = 12000;
+                webRequest.ContentType = "application/json";
+                webRequest.CookieContainer = cc;
+                webRequest.Host = "forms.office.com";
+                webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
+                webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
+                webRequest.Method = "PATCH";
+                webRequest.ContentType = "application/json";
+                webRequest.ContentLength = json.Length;
+
+                using (Stream dataStream = webRequest.GetRequestStream())
+                {
+                    dataStream.Write(json, 0, json.Length);
+                    dataStream.Close();
+                }
+
+                using (var response = (HttpWebResponse) webRequest.GetResponse())
+                {
+                    return response.StatusCode == HttpStatusCode.NoContent;
+                }
             }
         }
 
@@ -298,37 +303,40 @@ namespace FormsPowerShellModule
         /// <returns></returns>
         private async Task<bool> MoveForm(string userId, string formId, string newOwnerId, bool isNewOwnerGroup)
         {
-            FormsApiAuthenticationInformation authenticationInformation = await new WebBrowserFactory().AcquireToken();
-
-            string body = "{\"newOwnerId\":\"" + newOwnerId + "\",\"isNewOwnerGroup\":" +
-                          $"{isNewOwnerGroup}".ToLower() + "}";
-            byte[] json = System.Text.Encoding.UTF8.GetBytes(body);
-
-            CookieContainer cc = new CookieContainer();
-            cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
-            cc.Add(authenticationInformation.AadAuthForms.GetCookie());
-
-            var webRequest = (HttpWebRequest) System.Net.WebRequest.Create(
-                $"https://forms.office.com/formapi/api/{TenantId}/users/{userId}/light/forms('{formId}')/MoveForm");
-            webRequest.Timeout = 12000;
-            webRequest.ContentType = "application/json";
-            webRequest.CookieContainer = cc;
-            webRequest.Host = "forms.office.com";
-            webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
-            webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
-            webRequest.Method = "POST";
-            webRequest.ContentType = "application/json";
-            webRequest.ContentLength = json.Length;
-
-            using (Stream dataStream = webRequest.GetRequestStream())
+            using (WebBrowserFactory webBrowser = new WebBrowserFactory())
             {
-                dataStream.Write(json, 0, json.Length);
-                dataStream.Close();
-            }
+                FormsApiAuthenticationInformation authenticationInformation = await webBrowser.AcquireToken();
 
-            using (var response = (HttpWebResponse) webRequest.GetResponse())
-            {
-                return response.StatusCode == HttpStatusCode.OK;
+                string body = "{\"newOwnerId\":\"" + newOwnerId + "\",\"isNewOwnerGroup\":" +
+                              $"{isNewOwnerGroup}".ToLower() + "}";
+                byte[] json = System.Text.Encoding.UTF8.GetBytes(body);
+
+                CookieContainer cc = new CookieContainer();
+                cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
+                cc.Add(authenticationInformation.AadAuthForms.GetCookie());
+
+                var webRequest = (HttpWebRequest) System.Net.WebRequest.Create(
+                    $"https://forms.office.com/formapi/api/{TenantId}/users/{userId}/light/forms('{formId}')/MoveForm");
+                webRequest.Timeout = 12000;
+                webRequest.ContentType = "application/json";
+                webRequest.CookieContainer = cc;
+                webRequest.Host = "forms.office.com";
+                webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
+                webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
+                webRequest.Method = "POST";
+                webRequest.ContentType = "application/json";
+                webRequest.ContentLength = json.Length;
+
+                using (Stream dataStream = webRequest.GetRequestStream())
+                {
+                    dataStream.Write(json, 0, json.Length);
+                    dataStream.Close();
+                }
+
+                using (var response = (HttpWebResponse) webRequest.GetResponse())
+                {
+                    return response.StatusCode == HttpStatusCode.OK;
+                }
             }
         }
 

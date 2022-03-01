@@ -80,10 +80,12 @@ namespace FormsPowerShellModule
             string token = string.Empty;
             if (Result == null)
             {
-                FormsApiAuthenticationInformation authenticationInformation =
-                    new WebBrowserFactory().AcquireToken().GetAwaiter().GetResult();
-                token = authenticationInformation.AadAuthForms.Value;
-                TenantId = authenticationInformation.TenantId;
+                using (WebBrowserFactory webBrowser = new WebBrowserFactory())
+                {
+                    FormsApiAuthenticationInformation authenticationInformation = webBrowser.AcquireToken().GetAwaiter().GetResult();
+                    token = authenticationInformation.AadAuthForms.Value;
+                    TenantId = authenticationInformation.TenantId;
+                }
             }
             else
             {
@@ -198,37 +200,39 @@ namespace FormsPowerShellModule
 
         public async Task<Question[]> GetFormQuestions(string userId, string formId)
         {
-            FormsApiAuthenticationInformation authenticationInformation = await new WebBrowserFactory().AcquireToken();
-
-
-            CookieContainer cc = new CookieContainer();
-            cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
-            cc.Add(authenticationInformation.AadAuthForms.GetCookie());
-
-            var webRequest =
-                (HttpWebRequest) System.Net.WebRequest.Create(
-                    $"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')/questions");
-            webRequest.Timeout = 12000;
-            webRequest.ContentType = "application/json";
-            webRequest.CookieContainer = cc;
-            webRequest.Host = "forms.office.com";
-            webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
-            webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
-            webRequest.Method = "GET";
-            webRequest.ContentType = "application/json";
-            using (var response = (HttpWebResponse) webRequest.GetResponse())
+            using (WebBrowserFactory webBrowser = new WebBrowserFactory())
             {
-                using (System.IO.Stream s = response.GetResponseStream())
+                FormsApiAuthenticationInformation authenticationInformation = await webBrowser.AcquireToken();
+
+                CookieContainer cc = new CookieContainer();
+                cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
+                cc.Add(authenticationInformation.AadAuthForms.GetCookie());
+
+                var webRequest =
+                    (HttpWebRequest) System.Net.WebRequest.Create(
+                        $"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')/questions");
+                webRequest.Timeout = 12000;
+                webRequest.ContentType = "application/json";
+                webRequest.CookieContainer = cc;
+                webRequest.Host = "forms.office.com";
+                webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
+                webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
+                webRequest.Method = "GET";
+                webRequest.ContentType = "application/json";
+                using (var response = (HttpWebResponse) webRequest.GetResponse())
                 {
-                    using (System.IO.StreamReader sr = new System.IO.StreamReader(s))
+                    using (System.IO.Stream s = response.GetResponseStream())
                     {
-                        return JsonConvert.DeserializeObject<Questions>(sr.ReadToEnd(),
-                                new JsonSerializerSettings()
-                                {
-                                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                                    NullValueHandling = NullValueHandling.Ignore
-                                })
-                            ?.Items;
+                        using (System.IO.StreamReader sr = new System.IO.StreamReader(s))
+                        {
+                            return JsonConvert.DeserializeObject<Questions>(sr.ReadToEnd(),
+                                    new JsonSerializerSettings()
+                                    {
+                                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                                        NullValueHandling = NullValueHandling.Ignore
+                                    })
+                                ?.Items;
+                        }
                     }
                 }
             }
@@ -236,37 +240,39 @@ namespace FormsPowerShellModule
 
         public async Task<Response[]> GetFormResponses(string userId, string formId)
         {
-            FormsApiAuthenticationInformation authenticationInformation = await new WebBrowserFactory().AcquireToken();
-
-
-            CookieContainer cc = new CookieContainer();
-            cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
-            cc.Add(authenticationInformation.AadAuthForms.GetCookie());
-
-            var webRequest =
-                (HttpWebRequest)System.Net.WebRequest.Create(
-                    $"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')/responses");
-            webRequest.Timeout = 12000;
-            webRequest.ContentType = "application/json";
-            webRequest.CookieContainer = cc;
-            webRequest.Host = "forms.office.com";
-            webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
-            webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
-            webRequest.Method = "GET";
-            webRequest.ContentType = "application/json";
-            using (var response = (HttpWebResponse)webRequest.GetResponse())
+            using (WebBrowserFactory webBrowser = new WebBrowserFactory())
             {
-                using (System.IO.Stream s = response.GetResponseStream())
+                FormsApiAuthenticationInformation authenticationInformation = await webBrowser.AcquireToken();
+
+                CookieContainer cc = new CookieContainer();
+                cc.Add(authenticationInformation.RequestVerificationToken.GetCookie());
+                cc.Add(authenticationInformation.AadAuthForms.GetCookie());
+
+                var webRequest =
+                    (HttpWebRequest) System.Net.WebRequest.Create(
+                        $"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/forms('{formId}')/responses");
+                webRequest.Timeout = 12000;
+                webRequest.ContentType = "application/json";
+                webRequest.CookieContainer = cc;
+                webRequest.Host = "forms.office.com";
+                webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
+                webRequest.Headers.Add("__requestverificationtoken", authenticationInformation.AntiForgeryToken);
+                webRequest.Method = "GET";
+                webRequest.ContentType = "application/json";
+                using (var response = (HttpWebResponse) webRequest.GetResponse())
                 {
-                    using (System.IO.StreamReader sr = new System.IO.StreamReader(s))
+                    using (System.IO.Stream s = response.GetResponseStream())
                     {
-                        return JsonConvert.DeserializeObject<Responses>(sr.ReadToEnd(),
-                                new JsonSerializerSettings()
-                                {
-                                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                                    NullValueHandling = NullValueHandling.Ignore
-                                })
-                            ?.Items;
+                        using (System.IO.StreamReader sr = new System.IO.StreamReader(s))
+                        {
+                            return JsonConvert.DeserializeObject<Responses>(sr.ReadToEnd(),
+                                    new JsonSerializerSettings()
+                                    {
+                                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                                        NullValueHandling = NullValueHandling.Ignore
+                                    })
+                                ?.Items;
+                        }
                     }
                 }
             }

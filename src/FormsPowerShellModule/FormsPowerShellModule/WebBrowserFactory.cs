@@ -133,7 +133,6 @@ namespace FormsPowerShellModule
                 }
             }
         }
-        
 
         private void OnClosed(object sender, EventArgs e)
         {
@@ -149,7 +148,9 @@ namespace FormsPowerShellModule
             _cookiesTask = new TaskCompletionSource<FormsApiAuthenticationInformation>();
             InitWebView();
             ShowDialog();
-            return await _cookiesTask.Task;
+            FormsApiAuthenticationInformation frm = await _cookiesTask.Task;
+            _webView2.Dispose();
+            return frm;
         }
 
     }

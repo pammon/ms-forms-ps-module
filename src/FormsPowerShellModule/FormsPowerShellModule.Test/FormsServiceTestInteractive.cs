@@ -107,7 +107,7 @@ namespace FormsPowerShellModule.Test
         public void TestUpdateFormInteractive()
         {
             _formsService.Connect();
-            Assert.IsTrue(FormsService.Instance.UpdateFormSettings(_demoUserId, _formId, true, "thanks ms for nothing. assholes")
+            Assert.IsTrue(FormsService.Instance.UpdateFormSettings(_demoUserId, _formId, true, "thanks ms for nothing")
                 .GetAwaiter().GetResult());
         }
 
@@ -118,7 +118,7 @@ namespace FormsPowerShellModule.Test
             _formsService.Connect();
             var questions = FormsService.Instance.GetFormQuestions(_demoUserId, _formId).GetAwaiter().GetResult();
             Assert.IsNotNull(questions);
-            Assert.IsTrue(questions.Length > 2);
+            Assert.IsTrue(questions.Length >= 1);
         }
 
 

@@ -110,6 +110,12 @@ namespace FormsPowerShellModule
                 CoreWebView2Cookie aadAuthForms = cookies.SingleOrDefault(c =>
                     c.Name.Trim().Equals("AADAuth.forms", StringComparison.InvariantCultureIgnoreCase));
 
+                string cookiestring = string.Join("; ", cookies.Select(c => $"{c.Name}={c.Value}"));
+
+
+                CoreWebView2Cookie oIDCAuthForms = cookies.SingleOrDefault(c =>
+                    c.Name.Trim().Equals("OIDCAuth.forms", StringComparison.InvariantCultureIgnoreCase));
+
                 string html = await _webView2.CoreWebView2.ExecuteScriptAsync("document.documentElement.outerHTML");
 
                 Match antiForgeryTokenMatch = Regex.Match(html, "antiForgeryToken:([^,]*)");
@@ -122,10 +128,10 @@ namespace FormsPowerShellModule
 
 
                     if (requestverificationtoken != null && aadAuthForms != null &&
-                        !string.IsNullOrEmpty(antiForgeryToken))
+                        !string.IsNullOrEmpty(antiForgeryToken) && oIDCAuthForms != null)
                     {
 
-                        _cookiesTask.SetResult(new FormsApiAuthenticationInformation(antiForgeryToken, requestverificationtoken, aadAuthForms, tenantId));
+                        _cookiesTask.SetResult(new FormsApiAuthenticationInformation(antiForgeryToken, requestverificationtoken, aadAuthForms, oIDCAuthForms, tenantId));
                          DialogResult = DialogResult.OK;
                         Close();
                     }

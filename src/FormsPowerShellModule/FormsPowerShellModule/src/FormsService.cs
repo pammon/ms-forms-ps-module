@@ -34,13 +34,15 @@ namespace FormsPowerShellModule
         public void DownloadDownloadExcelFile(string formId, string path, int minResponseId = 1,
             int maxResponseId = 1000)
         {
+            FormsApiAuthenticationInformation authenticationInformation = GetFormsApiAuthenticationInformation();
+            string cookieHeader = $"OIDCAuth.forms={authenticationInformation.OIDCAuthToken.Value};";
             string url =
                 $"https://forms.office.com/formapi/DownloadExcelFile.ashx?formid={formId}&timezoneOffset=180&minResponseId={minResponseId}&maxResponseId={maxResponseId}";
             var webRequest = System.Net.WebRequest.Create(url);
             webRequest.Method = "GET";
             webRequest.Timeout = 60000;
             webRequest.ContentType = "application/json";
-            webRequest.Headers.Add("cookie", getCookieHeaderValue());
+            webRequest.Headers.Add("cookie", cookieHeader);
             webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
 
             using (var response = webRequest.GetResponse())
@@ -56,37 +58,22 @@ namespace FormsPowerShellModule
             }
         }
 
-        private string getCookieHeaderValue()
+        private FormsApiAuthenticationInformation GetFormsApiAuthenticationInformation()
         {
-            string cookie = string.Empty;
-            if (Result == null)
+            using (WebBrowserFactory webBrowser = new WebBrowserFactory())
             {
-                using (WebBrowserFactory webBrowser = new WebBrowserFactory())
-                {
-                    FormsApiAuthenticationInformation authenticationInformation = webBrowser.AcquireToken().GetAwaiter().GetResult();
-
-                    TenantId = authenticationInformation.TenantId;
-                    cookie = $"OIDCAuth.forms={authenticationInformation.OIDCAuthToken.Value};";
-                }
-            }
-            else
-            {
-                if (Result.ExpiresOn < DateTime.Now)
-                {
-                    AcquireToken().GetAwaiter().GetResult();
-                }
-                cookie = $"AADAuth.forms={Result.AccessToken};";
+               return webBrowser.AcquireToken().GetAwaiter().GetResult();
             }
 
-            return cookie;
         }
 
 
         public Forms[] GetForms(string userId, List<string> fields = null)
         {
-           
+            FormsApiAuthenticationInformation authenticationInformation = GetFormsApiAuthenticationInformation();
+            string cookieHeader = $"OIDCAuth.forms={authenticationInformation.OIDCAuthToken.Value};";
 
-            string url = $"https://forms.office.com/formapi/api/{TenantId}/users/{userId}/light/forms";
+            string url = $"https://forms.office.com/formapi/api/{authenticationInformation.TenantId}/users/{userId}/light/forms";
             if (fields != null && fields.Count > 0)
             {
                 if (!fields.Any(f => f.ToLower().Equals("id")))
@@ -107,8 +94,7 @@ namespace FormsPowerShellModule
             webRequest.Method = "GET";
             webRequest.Timeout = 12000;
             webRequest.ContentType = "application/json";
-           
-            webRequest.Headers.Add("cookie", getCookieHeaderValue());
+            webRequest.Headers.Add("cookie", cookieHeader);
             webRequest.Headers.Add("x-ms-forms-isdelegatemode", "true");
 
             try
@@ -119,7 +105,8 @@ namespace FormsPowerShellModule
                     {
                         using (System.IO.StreamReader sr = new System.IO.StreamReader(s))
                         {
-                            return JsonConvert.DeserializeObject<FormsResult>(sr.ReadToEnd(),
+                            string stext = sr.ReadToEnd();
+                            return JsonConvert.DeserializeObject<FormsResult>(stext,
                                     new JsonSerializerSettings()
                                     {
                                         ContractResolver = new CamelCasePropertyNamesContractResolver(),
